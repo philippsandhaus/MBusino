@@ -58,7 +58,6 @@ void onEvent(arduino_event_id_t event) {
 }
 #endif
 
-
 // WARNING: This function is called from a separate FreeRTOS task (thread)!
 void WiFiEvent(WiFiEvent_t event) {
   Serial.printf("[WiFi-event] event: %d\n", event);

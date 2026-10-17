@@ -17,12 +17,4 @@ You should have received a copy of the GNU General Public License along with thi
 
 #include "config.h"
 
-#if defined(MBUSINO_ETH) && MBUSINO_SLAVES == 1
-#include "src/variants/nano/main.h"
-#elif defined(MBUSINO_ETH) && MBUSINO_SLAVES == 5
-#include "src/variants/nano5s/main.h"
-#elif defined(MBUSINO_SENSORS) && MBUSINO_SLAVES == 1
-#include "src/variants/shield/main.h"
-#elif defined(MBUSINO_SENSORS) && MBUSINO_SLAVES == 5
-#include "src/variants/shield5s/main.h"
-#endif
+#include "src/main.h"
