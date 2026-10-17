@@ -229,12 +229,14 @@ uint16_t pulseInterval = 1000;
 #include "html.h"
 #include "guiServer.h"
 #include "mqtt.h"
-#include "calibration.h"
-#include "sensorRefresh.h"
+#include "../../calibration.h"
+#include "../../sensorRefresh.h"
 #include "autodiscover.h"
 #if defined(ESP32)
-#include "networkEvents.h"
+#include "../../networkEvents.h"
 #endif
+
+void heapCalc(); // defined below loop(), no automatic prototype outside of .ino files
 
 void setup() {
   #if defined(ESP32)

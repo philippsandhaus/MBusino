@@ -189,9 +189,9 @@ uint8_t adMbusMessageCounter = 0; // Counter for autodiscouver mbus message.
 uint32_t minFreeHeap = 0;
 
 //outsourced program parts
-#include "networkEvents.h"
+#include "../../networkEvents.h"
 #include "html.h"
-#include "mqtt.h"
+#include "../../mqtt.h"
 #include "guiServer.h"
 #include "autodiscover.h"
 
