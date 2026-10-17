@@ -148,6 +148,13 @@ void ledMqtt(bool connected);
 void hwMqttReconnected();
 void hwMqttSubscribe();
 void hwMqttCallback(char* topic, byte* payload);
+
+// M-Bus debug log for the web interface, see mbusLog.h
+#define MBUS_LOG_OK 0
+#define MBUS_LOG_NO_DATA 1
+#define MBUS_LOG_BAD_FRAME 2
+void mbusLogAdd(uint8_t status, uint8_t address, const uint8_t *data);
+void mbusLogSetJson(uint8_t address, const char *json);
 #if defined(ESP32)
 void WiFiEvent(WiFiEvent_t event);
 #endif
@@ -156,6 +163,7 @@ void WiFiEvent(WiFiEvent_t event);
 #include "html.h"
 #include "autodiscover.h"
 #include "mbus.h"
+#include "mbusLog.h"
 #ifdef MBUSINO_ETH
 #include "nano.h"
 #else
@@ -295,6 +303,7 @@ void setup() {
   buildSetupPage();
 
   hwNetworkSetup();
+  mbusLogBegin();
   client.setServer(userData.broker, userData.mqttPort);
   client.setCallback(callback);
 

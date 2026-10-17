@@ -117,6 +117,10 @@ R"rawliteral(        <br>
 R"rawliteral(        <p style='text-align:right'><a href='/setaddress' style='color:#3F4CFB'>set M-Bus Address</a></p>
 )rawliteral"
 #endif
+#if defined(MBUSINO_ETH)
+R"rawliteral(        <p style='text-align:right'><a href='/mbus' style='color:#3F4CFB'>M-Bus telegrams</a></p>
+)rawliteral"
+#endif
 R"rawliteral(        <p style='text-align:right'><a href='/update' style='color:#3F4CFB'>update</a></p>
         <p style='text-align:right'><a href='https://www.github.com/zeppelin500/mbusino' style='color:#3F4CFB'>MBusino</a></p>
       </form>

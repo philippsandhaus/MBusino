@@ -1,4 +1,6 @@
 void setupServer(){
+  mbusLogSetupServer();
+
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
   request->send_P(200, "text/html", html_buffer); 
   });

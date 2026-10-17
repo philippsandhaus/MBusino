@@ -218,6 +218,7 @@ void mbusLoop(){
         recordCounter[currentAddressCounter] = 0;
         fcb[currentAddressCounter] = false;
         client.publish((mbusTopic(currentAddress) + "MBUSerror").c_str(), "no_Data_received");
+        mbusLogAdd(MBUS_LOG_NO_DATA, currentAddress, NULL);
         mbusLoopStatus = 0;
         shc = true;
         mtPolling = false;
@@ -230,6 +231,7 @@ void mbusLoop(){
         shc = true;
         byte mbus_data[MBUS_DATA_SIZE] = { 0 };
         bool mbus_good_frame = mbus.get_response(mbus_data, sizeof(mbus_data));
+        mbusLogAdd(mbus_good_frame ? MBUS_LOG_OK : MBUS_LOG_BAD_FRAME, currentAddress, mbus_data);
 
         if(userData.telegramDebug == true){
           mbusPublishTelegram(mbus_data);
@@ -247,6 +249,7 @@ void mbusLoop(){
           responseAddress = mbus_data[5];
 
           serializeJson(doc, jsonstring); // store the json in a global array
+          mbusLogSetJson(responseAddress, jsonstring);
           client.publish((mbusTopic(responseAddress) + "error").c_str(), String(payload.getError()).c_str());
           client.publish((mbusTopic(responseAddress) + "jsonstring").c_str(), jsonstring);
           client.publish((mbusTopic(responseAddress) + (MBUSINO_SLAVES > 1 ? "fcb" : "FCB")).c_str(), String(fcb[currentAddressCounter]).c_str());
