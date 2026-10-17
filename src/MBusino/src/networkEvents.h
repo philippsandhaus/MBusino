@@ -1,63 +1,3 @@
-#ifdef MBUSINO_ETH
-// WARNING: onEvent is called from a separate FreeRTOS task (thread)!
-void onEvent(arduino_event_id_t event) {
-  switch (event) {
-    case ARDUINO_EVENT_ETH_START:
-      Serial.println("ETH Started");
-      // The hostname must be set after the interface is started, but needs
-      // to be set before DHCP, so set it from the event handler thread.
-//      ETH.setHostname(String(String(userData.mbusinoName)+"-eth").c_str());
-      ETH.setHostname(userData.mbusinoName);
-      //ETH.setLinkSpeed(10);
-      break;
-    case ARDUINO_EVENT_ETH_CONNECTED: 
-      Serial.println("ETH Connected"); 
-      eth_connected = true;
-      if(ethLinkSeen == false){ // start the DHCP timeout at the first link up, link flapping must not restart it
-        ethLinkSeen = true;
-        timerETHmessage = millis();
-      }
-      timerNetworkChange = millis();
-      break;
-    case ARDUINO_EVENT_ETH_GOT_IP:
-      Serial.printf("[ETH] %lu ms: Got IP\n", millis());
-      Serial.println(ETH);
-      eth_connected = true;
-      gotIP = true;
-      if(ethLostSince != 0){ // Ethernet came back within the grace period
-        Serial.printf("[ETH] %lu ms: back after %lu ms, no restart\n", millis(), millis() - ethLostSince);
-        ethLostSince = 0;
-      }
-      break;
-    case ARDUINO_EVENT_ETH_LOST_IP:
-      Serial.printf("[ETH] %lu ms: Lost IP\n", millis());
-      eth_connected = false;
-      if(ethLostSince == 0){ // start the grace period, loop() restarts if Ethernet does not come back
-        ethLostSince = millis();
-        Serial.printf("[ETH] %lu ms: grace period started, restart if Ethernet does not return\n", millis());
-      }
-      break;
-    case ARDUINO_EVENT_ETH_DISCONNECTED:
-      Serial.println("[ETH] Disconnected");
-      eth_connected = false;
-      if(gotIP == true){ // cable was unplugged, start the DHCP timeout again at the next link up
-        ethLinkSeen = false;
-        if(ethLostSince == 0){ // start the grace period only for an established connection
-          ethLostSince = millis();
-          Serial.printf("[ETH] %lu ms: grace period started, restart if Ethernet does not return\n", millis());
-        }
-      }
-      gotIP = false;
-      break;
-    case ARDUINO_EVENT_ETH_STOP:
-      Serial.println("ETH Stopped");
-      eth_connected = false;
-      break;
-    default: break;
-  }
-}
-#endif
-
 // WARNING: This function is called from a separate FreeRTOS task (thread)!
 void WiFiEvent(WiFiEvent_t event) {
   Serial.printf("[WiFi-event] event: %d\n", event);
@@ -68,35 +8,29 @@ void WiFiEvent(WiFiEvent_t event) {
     case ARDUINO_EVENT_WIFI_STA_START:           Serial.println("WiFi client started"); break;
     case ARDUINO_EVENT_WIFI_STA_STOP:            Serial.println("WiFi clients stopped"); break;
     case ARDUINO_EVENT_WIFI_STA_CONNECTED:
-      Serial.println("Connected to access point"); 
-#ifndef MBUSINO_ETH
-      pulseInterval = 500;
-#endif
+      Serial.println("Connected to access point");
+      ledPulse(500);
       break;
-    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:    
-      Serial.println("Disconnected from WiFi access point"); 
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+      Serial.println("Disconnected from WiFi access point");
       wifiReconnect = true;
       timerWifiReconnect = millis();
-#ifndef MBUSINO_ETH
-      pulseInterval = 1000;
-    break;
-#endif
+      ledPulse(1000);
+      break;
     case ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE: Serial.println("Authentication mode of access point has changed"); break;
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
       Serial.print("Obtained IP address: ");
       Serial.println(WiFi.localIP());
       break;
-#ifdef MBUSINO_ETH
-    case ARDUINO_EVENT_WIFI_STA_LOST_IP:        Serial.println("Lost IP address and IP address is reset to 0"); break;
-#else
-    case ARDUINO_EVENT_WIFI_STA_LOST_IP:        
-      Serial.println("Lost IP address and IP address is reset to 0"); 
-      Serial.println("MBusino will restart soon"); 
-      pulseInterval = 10;
-    timerReboot = millis();
-    waitForRestart = true;
-    break;
+    case ARDUINO_EVENT_WIFI_STA_LOST_IP:
+      Serial.println("Lost IP address and IP address is reset to 0");
+#ifndef MBUSINO_ETH // Wi-Fi is the only transport of the shield, restart and connect again
+      Serial.println("MBusino will restart soon");
+      ledPulse(10);
+      timerReboot = millis();
+      waitForRestart = true;
 #endif
+      break;
     case ARDUINO_EVENT_WPS_ER_SUCCESS:          Serial.println("WiFi Protected Setup (WPS): succeeded in enrollee mode"); break;
     case ARDUINO_EVENT_WPS_ER_FAILED:           Serial.println("WiFi Protected Setup (WPS): failed in enrollee mode"); break;
     case ARDUINO_EVENT_WPS_ER_TIMEOUT:          Serial.println("WiFi Protected Setup (WPS): timeout in enrollee mode"); break;

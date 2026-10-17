@@ -1,9 +1,6 @@
 void setupServer(){
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
   request->send_P(200, "text/html", html_buffer); 
-#ifdef MBUSINO_ETH
-  Serial.println("Webserver: Client Connected");
-#endif
   });
     
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
@@ -55,7 +52,6 @@ void setupServer(){
         }
       }
 
-#ifdef MBUSINO_SENSORS
       if (request->hasParam("extension")) {
         inputMessage = request->getParam("extension")->value();
         inputParam = "extension";
@@ -65,7 +61,6 @@ void setupServer(){
           }
       }
       
-#endif
       if (request->hasParam("haAd")) {
         inputMessage = request->getParam("haAd")->value();
         inputParam = "haAd";
@@ -95,7 +90,6 @@ void setupServer(){
       }
 
 #endif
-#ifdef MBUSINO_SENSORS
       if (request->hasParam("sensorInterval")) {
         inputMessage = request->getParam("sensorInterval")->value();
         inputParam = "sensorInterval";
@@ -105,7 +99,6 @@ void setupServer(){
           }
       }
 
-#endif
       if (request->hasParam("mbusInterval")) {
         inputMessage = request->getParam("mbusInterval")->value();
         inputParam = "mbusInterval";
@@ -198,11 +191,7 @@ void setupServer(){
       }     
 
 #endif
-#if defined(MBUSINO_SENSORS) && MBUSINO_SLAVES > 1
       request->send(200, "text/html", "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>MBusino Setup</title><style>*,::after,::before{box-sizing:border-box;}body{margin:0;font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans','Liberation Sans';font-size:1rem;font-weight:400;line-height:1.5;color:#FFF;background-color:#438287;}.form-control{display:block;width:100%;height:calc(1.5em + .75rem + 2px);border:1px solid #ced4da;}button{border:1px solid transparent;color:#fff;background-color:#007bff;border-color:#007bff;padding:.5rem 1rem;font-size:1.25rem;line-height:1.5;border-radius:.3rem;width:100%}.form-signin{width:100%;max-width:400px;padding:15px;margin:auto;}h1,p{text-align: center}</style> </head> <body><main class='form-signin'> <h1><i>MBusino</i> Setup</h1> <br/> <p>Your settings have been saved successfully!<br />MBusino restart now!<br />MQTT should now work. <br /> If you find the Acces Point network again, your credentials were wrong.</p> <p style='text-align:right'><a href='/' style='color:#3F4CFB'>Home</a></p></main></body></html>");
-#else
-      request->send(200, "text/html", "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>MBusino Setup</title><style>*,::after,::before{box-sizing:border-box;}body{margin:0;font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans','Liberation Sans';font-size:1rem;font-weight:400;line-height:1.5;color:#FFF;background-color:#438287;}.form-control{display:block;width:100%;height:calc(1.5em + .75rem + 2px);border:1px solid #ced4da;}button{border:1px solid transparent;color:#fff;background-color:#007bff;border-color:#007bff;padding:.5rem 1rem;font-size:1.25rem;line-height:1.5;border-radius:.3rem;width:100%}.form-signin{width:100%;max-width:400px;padding:15px;margin:auto;}h1,p{text-align: center}</style> </head> <body><main class='form-signin'> <h1><i>MBusino</i> Setup</h1> <br/> <p>Your settings have been saved successfully!<br />MBusino restart now!<br />MQTT should now work. <br /> If you find the Acces Point network again, your credentials were wrong.</p></main></body></html>");
-#endif
   });
 
 #if MBUSINO_SLAVES > 1
@@ -223,14 +212,9 @@ public:
   CaptiveRequestHandler() {}
   virtual ~CaptiveRequestHandler() {}
 
-#ifdef MBUSINO_ETH
-  //bool canHandle(AsyncWebServerRequest* request) const override { 
-  bool canHandle(AsyncWebServerRequest* request) { 
-#else
   bool canHandle(AsyncWebServerRequest *request) const override {
-#endif
-    return true; 
-    }  
+    return true;
+  }  
 
   void handleRequest(AsyncWebServerRequest *request) {
     request->send_P(200, "text/html", html_buffer); 

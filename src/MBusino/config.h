@@ -22,3 +22,10 @@
 #if MBUSINO_SLAVES != 1 && MBUSINO_SLAVES != 5
 #error "MBUSINO_SLAVES must be 1 or 5"
 #endif
+
+// debug output on the serial monitor; on the ESP8266 Serial is the M-Bus UART, so nothing is printed there
+#if defined(ESP8266)
+#define LOG(...)
+#else
+#define LOG(...) Serial.printf(__VA_ARGS__)
+#endif
