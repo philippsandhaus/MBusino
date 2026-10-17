@@ -17,6 +17,8 @@ the project is developed with **Arduino IDE 2**, source code and .bin files will
 
 **MBusino5S** code is for up to 5 Slaves
 
+All variants are built from the one sketch **src/MBusino/MBusino.ino**. The selected board decides between the MBusino shield (LOLIN(WEMOS) D1 mini, LOLIN S2 Mini) and the MBusino Nano (MakerGO ESP32 C3 SuperMini). For the 5 slave version set `MBUSINO_SLAVES` to 5 in **src/MBusino/config.h**. The ready to flash .bin files stay in **src/MBusino**, **src/MBusino5S**, **src/MBusinoNano** and **src/MBusinoNano5S**. `tools/build-all.sh` builds all variants with arduino-cli.
+
 ## Hardware
 
 ### MBusino
