@@ -1,0 +1,75 @@
+name: Build firmware
+
+# builds all MBusino variants with tools/build-all.sh on every push and pull request
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  ESP32_CORE: esp32:esp32@3.3.7
+  ESP8266_CORE: esp8266:esp8266@3.1.2
+  ESP8266_URL: https://arduino.esp8266.com/stable/package_esp8266com_index.json
+  LIBRARIES: >-
+    "MBusinoLib@0.10.0"
+    "MBusCom@0.1.9"
+    "ArduinoJson@7.4.3"
+    "PubSubClient@2.8.0"
+    "ESP Async WebServer@3.12.1"
+    "Async TCP@3.5.0"
+    "ESP Async TCP@2.0.0"
+    "OneWire@2.3.8"
+    "DallasTemperature@4.0.6"
+    "Adafruit BME280 Library@2.3.0"
+    "Adafruit Unified Sensor@1.1.15"
+    "Adafruit BusIO@1.17.4"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [MBusino-d1, MBusino-s2, MBusino5S-d1, MBusino5S-s2, MBusinoNano, MBusinoNano5S]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: arduino/setup-arduino-cli@v2
+
+      - name: Select core
+        id: core
+        run: |
+          case "${{ matrix.variant }}" in
+            *-d1) echo "core=$ESP8266_CORE" >> "$GITHUB_OUTPUT" ;;
+            *)    echo "core=$ESP32_CORE"   >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Cache cores and libraries
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.arduino15
+            ~/Arduino/libraries
+          key: arduino-${{ steps.core.outputs.core }}-${{ hashFiles('.github/workflows/build.yml') }}
+
+      - name: Install core and libraries
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls "$ESP8266_URL"
+          arduino-cli core update-index
+          arduino-cli core install "${{ steps.core.outputs.core }}"
+          eval arduino-cli lib install $LIBRARIES
+
+      - name: Build ${{ matrix.variant }}
+        run: tools/build-all.sh ${{ matrix.variant }}
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.variant }}
+          path: |
+            firmware-build/${{ matrix.variant }}/*/MBusino.ino.bin
+            firmware-build/${{ matrix.variant }}/*/MBusino.ino.merged.bin
+            firmware-build/${{ matrix.variant }}/*/MBusino.ino.bootloader.bin
+            firmware-build/${{ matrix.variant }}/*/MBusino.ino.partitions.bin
+          if-no-files-found: error
