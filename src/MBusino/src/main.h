@@ -311,8 +311,11 @@ void setup() {
   if(apMode==true){
     dnsServer.start(53, "*", WiFi.softAPIP());
   }
-  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);//only when requested from AP
   setupUpdateServer();
+  // only requests to the setup AP, ON_AP_FILTER would also match Ethernet (WiFi.localIP() is 0.0.0.0 there)
+  server.addHandler(new CaptiveRequestHandler()).setFilter([](AsyncWebServerRequest *request){
+    return apMode == true && request->client()->localIP() == WiFi.softAPIP();
+  });
 
   ArduinoOTA.setPassword((const char *)"mbusino");
 #ifdef MBUSINO_ETH
